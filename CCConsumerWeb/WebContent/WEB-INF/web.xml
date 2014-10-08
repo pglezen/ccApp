@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+	<display-name>CCConsumerWeb</display-name>
+	<security-constraint>
+		<display-name>Secure Account Query</display-name>
+		<web-resource-collection>
+			<web-resource-name>Acct Query Page</web-resource-name>
+			<url-pattern>/acctLookup.html</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+		<web-resource-collection>
+			<web-resource-name>Acct Query Ajax</web-resource-name>
+			<description>AJAX queries.</description>
+			<url-pattern>/cc/json</url-pattern>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<web-resource-collection>
+			<web-resource-name>Credentials Ajax</web-resource-name>
+			<url-pattern>/creds/json</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<description>The role of querying an account.</description>
+			<role-name>AcctQuery</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-role>
+		<role-name>AcctQuery</role-name>
+	</security-role>
+</web-app>

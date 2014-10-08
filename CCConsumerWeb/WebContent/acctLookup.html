@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Account Lookup</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+  body {
+    width: 600px;
+    position: relative;
+  }
+  .fldLabel {
+    text-align: right; 
+    padding-right: 5px;
+    font-weight: bold; 
+  }
+  #header h1 {
+    float: left;
+    margin-top: 5px;
+  }
+  #agent {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+  #agent p {
+    display: inline;
+  }
+  #content {
+    clear: both;
+  }
+  #queryPanel {
+    float: left;
+    width: 300px;
+  }
+  #resultPanel {
+    margin-left: 320px;
+  }
+  #status {
+    clear: both;
+  }
+</style>
+<script>
+function encodeFormData(data) {
+  if (!data) return '';
+  var pairs = [];
+  for (var name in data) {
+    if (!data.hasOwnProperty(name)) continue;
+    if (typeof data[name] === 'function') continue;
+    console.log('Marshalling parameter ' + name);
+    try {
+      var value = data[name].toString();
+      name = encodeURIComponent(name).replace('%20', '+');
+      value = encodeURIComponent(value).replace('%20', '+');
+      pairs.push(name + '=' + value);
+    } catch (e) {
+      console.log('Exception: ' + e);
+    }
+  }
+  return pairs.join('&');
+}
+
+function postData(url, data, callback) {
+  console.log('About to post data for url = ' + url + ' with data = ' + data);
+  var request = new XMLHttpRequest();
+  request.open('POST', url, true);
+  request.onreadystatechange = function() {
+    console.log('XMLHttpRequest state = ' + request.readyState);
+    if (request.readyState === 4 && callback)
+      callback(request);
+  };
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  request.send(JSON.stringify(data));
+  console.log('returned from request.send');
+}
+
+function sendFormData() {
+  console.log('sendFormData invoked.');
+  var stuff = {};
+  stuff.CCNo     = document.forms.ccQuery.cc_no.value;
+  stuff.LastName = document.forms.ccQuery.last_name.value;
+  postData('cc/json', stuff, handleJSONResponse(Date.now()));
+  var retcode = false;
+  console.log('onsubmit returning ' + retcode);
+  return retcode;
+}
+
+function handleJSONResponse(before) {
+  return function(response) {
+    var ccResponse = {};
+    var after = Date.now();
+    console.log('Response time: ' + (after - before) + 'ms');
+    console.log('response ready state = ' + response.readyState);
+    console.log('Received response status: ' + response.status);
+    console.log('Content type: ' + response.getResponseHeader('Content-Type'));
+    ccResponse['AjaxResult'] = response.responseText;
+    console.log('CCResponse = ' + ccResponse['AjaxResult']);
+    ccResponse['ResponseTime'] = (after - before) + 'ms';
+    var outField;
+    if (response.getResponseHeader('Content-Type') === 'application/json') {
+      var ccObject = JSON.parse(ccResponse['AjaxResult']);
+      outField = document.getElementById('acct_no');
+      if (outField) { 
+    	outField.innerHTML = ccObject.AcctNo; 
+      }
+      outField = document.getElementById('cust_name');
+      if (outField) {
+    	outField.innerHTML = ccObject.LastName + ', ' + ccObject.FirstName
+      }
+      outField = document.getElementById('balance');
+      if (outField) {
+    	outField.innerHTML = ccObject.Balance;
+      }
+    }
+    for (var fieldName in ccResponse) {
+      console.log('Populating field name: ' + fieldName);
+      outField = document.getElementById(fieldName);
+      if (outField) {
+        outField.innerHTML = ccResponse[fieldName];
+      } else {
+        console.log(fieldName + ' ID does not exist in DOM');
+      }
+    }
+  }
+}
+</script>
+
+</head>
+<body>
+<div id="header">
+  <h1>Account Query</h1>
+  <div id="agent">
+    <p class="fldLabel">Agent: </p>
+    <p id="agent_name">Jim Smith</p>
+  </div>
+</div>
+<div id="content">
+<div id="queryPanel">
+  <form name="ccQuery">
+    <table>
+      <tr><td class="fldLabel"><label>CC Number:</label></td>
+        <td><input type="text" name="cc_no"/></td>
+      </tr>
+      <tr><td class="fldLabel"><label>Last Name:</label></td>
+        <td><input type="text" name="last_name"/></td>
+      </tr>
+      <tr><td colspan="2"><button onclick="sendFormData(); return false;">Look-up</button></td>
+      </tr>
+    </table>
+  </form>
+</div>
+<div id="resultPanel">
+  <form name="ccResults">
+    <table>
+      <tr><td class="fldLabel">Acct Number:</td>
+        <td class="fldValue" id="acct_no"></td>
+      </tr>
+      <tr><td class="fldLabel">Full Name:</td>
+        <td class="fldValue" id="cust_name"></td>
+      <tr><td class="fldLabel">Balance:</td>
+        <td class="fldValue" id="balance"></td>
+      </tr>
+    </table>
+  </form>
+</div>
+<div id="status">
+  <hr/>
+  <table>
+    <tr><td class="fldLabel">Response Time:</td>
+      <td id="ResponseTime"></td>
+    </tr>
+  </table>
+</div>
+<div id="AjaxResult">
+</div>
+</div>
+</body>
+</html>
