@@ -15,7 +15,7 @@ import org.acme.cc.jaxws.QueryResponse;
 
 @Stateless
 @LocalBean
-@WebServiceRef(name="service/CCService", type=org.acme.cc.jaxws.CCService.class)
+@WebServiceRef(name=AccountQueryDelegate.jndiLocalRef, type=org.acme.cc.jaxws.CCService.class)
 public class AccountQueryEJB {
    
    public static final String CLASSNAME = AccountQueryEJB.class.getName();

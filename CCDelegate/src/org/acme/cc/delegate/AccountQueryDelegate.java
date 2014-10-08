@@ -27,6 +27,13 @@ public class AccountQueryDelegate implements AccountQuery {
       log.entering(CLASSNAME, "ctor");
       try {
          Context ctx = new InitialContext();
+         String urlStr = (String)ctx.lookup("service/CCService");
+         if (urlStr == null) {
+            log.warning("Could not locate service URL in String namespace bindings.");
+            log.warning("Either configure this in the admin console or the default WSDL URL will be used.");
+         } else {
+            log.info("Found CCService URL: " + urlStr);
+         }
          CCService service = (CCService)ctx.lookup("java:comp/env/" + jndiLocalRef);
          jaxwsPortType = service.getCCService();
          if (jaxwsPortType == null) {
@@ -35,11 +42,13 @@ public class AccountQueryDelegate implements AccountQuery {
             de.setServiceName("CCService");
             throw de;
          }
-         String endpointURL = "http://localhost:9086/provider/CCService";
-         BindingProvider bp = (BindingProvider)jaxwsPortType;
-         Map<String, Object> reqCtx = bp.getRequestContext();
-         reqCtx.put("javax.xml.ws.service.endpoint.address", endpointURL);
-         log.fine("JAX-WS port type initialized with endpoint URL: " + endpointURL);
+         if (urlStr != null) {
+            BindingProvider bp = (BindingProvider) jaxwsPortType;
+            Map<String, Object> reqCtx = bp.getRequestContext();
+            reqCtx.put("javax.xml.ws.service.endpoint.address", urlStr);
+            log.info("JAX-WS port type programmatically initialized with endpoint URL: " + urlStr);
+            log.info("This URL can be overridden through the admin console.");
+         }
       } catch (NamingException e) {
          DelegateException de = new DelegateException(e);
          de.setJndiName(jndiLocalRef);
