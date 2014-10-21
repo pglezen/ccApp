@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,10 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.WebServiceRef;
 
-import org.acme.cc.ejb.AccountQueryEJB;
-import org.acme.cc.jaxws.CCPortType;
-import org.acme.cc.jaxws.CCService;
-import org.acme.cc.jaxws.QueryFaultMsg;
+import org.acme.cc.delegate.AccountQuery;
+import org.acme.cc.delegate.AccountQueryDelegate;
 import org.acme.cc.jaxws.QueryRequest;
 import org.acme.cc.jaxws.QueryResponse;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -34,8 +31,6 @@ public class AccountQueryJSON extends HttpServlet {
 	private static final String CLASSNAME = AccountQueryJSON.class.getName();
 	private static final Logger log = Logger.getLogger(CLASSNAME);
 	
-	@EJB AccountQueryEJB ejb;
-		
 	public static final String JSON_CC_NO = "CCNo";
 	public static final String JSON_ACCT_NO = "AcctNo";
 	public static final String JSON_FIRST_NAME = "FirstName";
@@ -74,8 +69,10 @@ public class AccountQueryJSON extends HttpServlet {
 		      soapInput.setLastName(jsonValue);
 		   }
 		   try {
+		      log.fine("Acquire instance of AccountQueryDelegate.");
+		      AccountQuery account = new AccountQueryDelegate();
 		      log.fine("Invoking CC web service.");
-            QueryResponse soapOutput = ejb.query(soapInput);
+            QueryResponse soapOutput = account.invoke(soapInput);
             log.fine("CC web service returned.");
             response.setStatus(200);
             response.setContentType("application/json");

@@ -4,7 +4,6 @@
 	<comment></comment>
 	<projects>
 		<project>CCConsumerWeb</project>
-		<project>CCConsumerEJB</project>
 		<project>CCDelegate</project>
 	</projects>
 	<buildSpec>

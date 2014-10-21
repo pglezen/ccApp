@@ -5,10 +5,6 @@
             <dependent-object>Module_1411322156920</dependent-object>
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="CCConsumerEJB.jar" deploy-path="/" handle="module:/resource/CCConsumerEJB/CCConsumerEJB">
-            <dependent-object>Module_1412719670195</dependent-object>
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="CCDelegate.jar" deploy-path="/lib" handle="module:/resource/CCDelegate/CCDelegate">
             <dependency-type>uses</dependency-type>
         </dependent-module>
